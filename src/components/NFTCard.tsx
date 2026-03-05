@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { formatUnits } from "viem";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -64,7 +63,7 @@ export default function NFTCard({ nft, onDonation, onTotalsChange }: NFTCardProp
         whileHover={{ y: -4 }}
       >
         <Card className="group relative flex flex-col overflow-hidden border transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30">
-          {/* Full image — no crop, auto height */}
+          {/* Full image — native img for reliable IPFS loading */}
           <div className="relative w-full overflow-hidden bg-muted">
             {metadata?.image ? (
               <>
@@ -73,14 +72,13 @@ export default function NFTCard({ nft, onDonation, onTotalsChange }: NFTCardProp
                     <ImageIcon className="h-10 w-10 text-muted-foreground/40" />
                   </div>
                 )}
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={metadata.image}
                   alt={metadata.name ?? "NFT"}
-                  width={600}
-                  height={750}
                   className={`w-full h-auto object-contain transition-transform duration-500 group-hover:scale-[1.03] ${imgLoaded ? "block" : "hidden"}`}
-                  unoptimized
                   onLoad={() => setImgLoaded(true)}
+                  onError={() => setImgLoaded(true)}
                 />
               </>
             ) : (
