@@ -31,25 +31,32 @@ export function useTopDonors(totalSupply: number, nftNames?: Record<number, stri
       const allDonations: RecentDonation[] = [];
 
       for (let tokenId = 1; tokenId <= totalSupply; tokenId++) {
-        const res = await fetch(`/api/donations/${tokenId}`);
-        if (!res.ok) continue;
-        const data: any[] = await res.json();
-        const name = nftNames?.[tokenId] ?? `NFT #${tokenId}`;
+        try {
+          const res = await fetch(`/api/donations/${tokenId}`);
+          if (!res.ok) continue;
+          const contentType = res.headers.get("content-type") ?? "";
+          if (!contentType.includes("application/json")) continue;
+          const data: any[] = await res.json();
+          if (!Array.isArray(data)) continue;
+          const name = nftNames?.[tokenId] ?? `NFT #${tokenId}`;
 
-        for (const d of data) {
-          const key = (d.donor as string).toLowerCase();
-          const existing = donorMap.get(key) ?? { totalAmount: 0n, nftIds: new Set<number>() };
-          existing.totalAmount += BigInt(d.amount);
-          existing.nftIds.add(tokenId);
-          donorMap.set(key, existing);
-          allDonations.push({
-            donor: d.donor,
-            amount: d.amount,
-            tokenId,
-            nftName: name,
-            timestamp: d.timestamp ?? 0,
-            transactionHash: d.transactionHash ?? "",
-          });
+          for (const d of data) {
+            const key = (d.donor as string).toLowerCase();
+            const existing = donorMap.get(key) ?? { totalAmount: 0n, nftIds: new Set<number>() };
+            existing.totalAmount += BigInt(d.amount);
+            existing.nftIds.add(tokenId);
+            donorMap.set(key, existing);
+            allDonations.push({
+              donor: d.donor,
+              amount: d.amount,
+              tokenId,
+              nftName: name,
+              timestamp: d.timestamp ?? 0,
+              transactionHash: d.transactionHash ?? "",
+            });
+          }
+        } catch {
+          continue;
         }
       }
 

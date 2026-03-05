@@ -1,7 +1,7 @@
 "use client";
 
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { parseUnits } from "viem";
+import { parseEther } from "viem";
 import { contractAddress, contractAbi } from "@/constants";
 import { useToast } from "@/components/ui/use-toast";
 import { useEffect } from "react";
@@ -29,7 +29,7 @@ export function useDonateToNFT() {
       abi: contractAbi,
       functionName: "donate",
       args: [BigInt(tokenId)],
-      value: parseUnits(amountInHbar, 8),
+      value: parseEther(amountInHbar),
     });
   };
 
